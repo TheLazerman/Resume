@@ -19,9 +19,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Build Docker Image
+        run: docker build -t lazerman/latex .
+
       - name: Compile LaTeX to PDF
-        # Removed the '-i' (interactive) flag to prevent the workflow from hanging 
-        # if LaTeX encounters an error and waits for user input.
         run: docker run --rm -v "$PWD":/data lazerman/latex pdflatex Gabriel_Coones_Resume.tex
 
       - name: Commit and push PDF
