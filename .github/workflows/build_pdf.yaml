@@ -1,17 +1,31 @@
-name: Build Resume on Push
+name: Compile Resume
 
-on: 
+on:
   push:
+    branches:
+      - main  # Update this if your default branch is 'master'
+    paths:
+      - 'Gabriel_Coones_Resume.tex'
 
 jobs:
-  run-script:
+  compile_and_push:
     runs-on: ubuntu-latest
+    
+    # Grants the action permission to push commits back to the repo
+    permissions:
+      contents: write
+
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Build Docker Image
-        run: docker build -t lazerman/latex .
+      - name: Compile LaTeX to PDF
+        # Removed the '-i' (interactive) flag to prevent the workflow from hanging 
+        # if LaTeX encounters an error and waits for user input.
+        run: docker run --rm -v "$PWD":/data lazerman/latex pdflatex Gabriel_Coones_Resume.tex
 
-      - name: Run Docker Image
-        run: docker run --rm -i -v "$PWD":/data lazerman/latex pdflatex Gabriel_Coones_Resume.tex
+      - name: Commit and push PDF
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: auto-compile Gabriel_Coones_Resume.tex to PDF"
+          file_pattern: 'Gabriel_Coones_Resume.pdf'
